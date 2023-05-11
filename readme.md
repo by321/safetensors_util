@@ -29,6 +29,7 @@ The optional **-pm** flag is meant to make output more readable. Many LoRA files
         "ss_dataset_dirs":"{\"abc\": {\"n_repeats\": 2, \"img_count\": 60}}",
 
 into this:
+
         "ss_dataset_dirs":{
          "abc":{
           "n_repeats":2,
