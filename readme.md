@@ -20,7 +20,7 @@ This is a utility program for [safetensors files](https://github.com/huggingface
 
 The most interesting/useful thing is the metadata command:
 
-        python safetensors_util.py metadata input_file.safetensors [-pm]
+        python safetensors_util.py metadata input_file.safetensors -pm
 
 Many safetensors files, especially LoRA files, have a __metadata__ field in the file header that records training information, such as learning rates, number of epochs, number of images used, etc. You can see how your favorite file was trained and perhaps use some of the training parameters for your own model in the future.
 
