@@ -64,7 +64,7 @@ def PrintHeader(cmdLine:dict,input_file:str) -> int:
 
     # All the .safetensors files I've seen have long key names, and as a result, 
     # the neither json nor pprint package prints text in very readable format,
-    # so we print it ourselves, putting key name on its own line.
+    # so we print it ourselves, putting key name & value on one long line.
     # Note the print out is in Python format, not valid JSON format.
     js=json.loads(hdrbuf)
 
@@ -76,7 +76,7 @@ def PrintHeader(cmdLine:dict,input_file:str) -> int:
         else:
             print(",")
         json.dump(key,fp=sys.stdout,ensure_ascii=False,separators=(',',':'))
-        print(":\n ",end='')
+        print(": ",end='')
         json.dump(js[key],fp=sys.stdout,ensure_ascii=False,separators=(',',':'))
     print("\n}")
     return 0

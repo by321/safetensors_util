@@ -3,13 +3,10 @@
 This is a utility program for [safetensors files](https://github.com/huggingface/safetensors "safetensors files"). Currently it can do the following:
 
     
-      Usage: safetensors_util.py [OPTIONS] COMMAND [ARGS]...
+      Usage: safetensors_util.py [OPTIONS] COMMAND [ARGS] [OPTIONS_FOR_COMMANDS]...
     
       Options:
         --version              Show the version and exit.
-        -f, --force-overwrite  overwrite existing files
-        -pm, --parse-more      when printing metadata, 'fix' unnecessarily escaped
-                                            doublequotes to make text more readable
         --help                 Show this message and exit.
     
       Commands:
@@ -17,6 +14,13 @@ This is a utility program for [safetensors files](https://github.com/huggingface
         header        print file header
         metadata    print only __metadata__ in file header
     
+Options for commands:
+
+        --help                 show help message about the command
+        -f, --force-overwrite  overwrite existing files
+        -pm, --parse-more      when printing metadata, 'fix' unnecessarily escaped
+                               doublequotes to make text more readable
+
 
 The most interesting/useful thing is the metadata command:
 

@@ -17,16 +17,16 @@ fix_ued_flag=click.option("-pm","--parse-more",default=False,is_flag=True, show_
 @click.group()
 
 @click.version_option(version=1)
-@force_overwrite_flag
-@fix_ued_flag
+#@force_overwrite_flag
+#@fix_ued_flag
 
 @click.pass_context
-def cli(ctx, force_overwrite:bool, parse_more:bool):
+def cli(ctx):
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
     ctx.ensure_object(dict)
-    ctx.obj['force_overwrite'] = force_overwrite
-    ctx.obj['parse_more'] = parse_more
+    #ctx.obj['force_overwrite'] = force_overwrite
+    #ctx.obj['parse_more'] = parse_more
 
 @cli.command(name="header",short_help="print file header")
 @readonly_input_file
