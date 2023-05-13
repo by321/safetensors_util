@@ -10,8 +10,10 @@ This is a utility program for [safetensors files](https://github.com/huggingface
         --help                 Show this message and exit.
     
       Commands:
+        checklora   see if input file is a LoRA file
         extracthdr  extract file header and save to output file
-        header        print file header
+        header      print file header
+        keyspy      print header keys as a Python frozenset
         metadata    print only __metadata__ in file header
     
 Options for commands:
