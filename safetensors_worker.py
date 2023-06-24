@@ -1,82 +1,66 @@
 import os, sys, json
+from safetensors_file import SafeTensorsFile
 
-class SafeTensorsException(Exception):
-    """Exception raised when something wrong with the file.
+def _need_force_overwrite(output_file:str,cmdLine:dict) -> bool:
+    if cmdLine["force_overwrite"]==False:
+        if os.path.exists(output_file):
+            print(f'output file "{output_file}" already exists, use -f flag to force overwrite',file=sys.stderr)
+            return True
+    return False
 
-    Attributes:
-        filename -- path to .safetensors file
-        whatiswrong -- string describing what's wrong
-    """
-    def __init__(self, filename:str, whatiswrong:str):
-        self.filename = filename
-        self.whatiswrong = whatiswrong
-        super().__init__()
+def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,out_st_file:str) -> int:
+    if _need_force_overwrite(out_st_file,cmdLine): return -1
 
-    def __str__(self):
-        return f"{self.filename} is not a valid .safetensors file: {self.whatiswrong}"
+    with open(in_json_file,"rt") as f:
+        inmeta=json.load(f)
+    if not "__metadata__" in inmeta:
+        print(f"file {in_json_file} does not contain a top-level __metadata__ item",file=sys.stderr)
+        #json.dump(inmeta,fp=sys.stdout,indent=2)
+        return -2
+    inmeta=inmeta["__metadata__"] #keep only metadata
+    #json.dump(inmeta,fp=sys.stdout,indent=2)
 
-class SafeTensorsFile:
-    def __init__(self):
-        self.f=None
-        self.hdrbuf=None
-
-    def __del__(self):
-        self.close()
-
-    def close(self):
-        if self.f is not None:
-            self.f.close()
-            self.f=None
-
-    def open(self,fn:str,openMode='rb',quiet=False)->int:
-        try:
-            st=os.stat(fn)
-            if st.st_size<8:
-                raise SafeTensorsException(fn,"length less than 8 bytes")
-
-            f=open(fn,openMode)
-            b8=f.read(8) #read header size
-            if len(b8)!=8:
-                raise SafeTensorsException(fn,f"read only {len(b8)} bytes at start of file")
-            headerlen=int.from_bytes(b8,'little',signed=False)
-            if headerlen==0:
-                raise SafeTensorsException(fn,"header size is 0")
-            if (8+headerlen>st.st_size): 
-                raise SafeTensorsException(fn,"header extends past end of file")
-
-            if quiet==False:
-                print(f"{fn}: length={st.st_size}, header length={headerlen}")
-            hdrbuf=f.read(headerlen)
-            if len(hdrbuf)!=headerlen:
-                raise SafeTensorsException(fn,f"header size is {headerlen}, but read {len(hdrbuf)} bytes")
-        except SafeTensorsException as e:
-            print(e,file=sys.stderr)
-            return -1
-
-        self.fn=fn
-        self.f=f
-        self.st=st
-        self.hdrbuf=hdrbuf
-        return 0
-
-    def parse_buffer(self):
-        if self.hdrbuf is None: return None
-        try:
-            return json.loads(self.hdrbuf)
-        except json.JSONDecodeError as e:
-            print("json.JSONDecodeError when parsing file header:",file=sys.stderr)
-            print(e,file=sys.stderr)
-            return None
-
-
-def PrintHeader(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile()
-    s.open(input_file)
-    js=s.parse_buffer()
+    s=SafeTensorsFile.open_file(in_st_file)
+    js=s.get_header()
     if js is None: return -1
 
-    # All the .safetensors files I've seen have long key names, and as a result, 
-    # the neither json nor pprint package prints text in very readable format,
+    if inmeta==[]:
+        js.pop("__metadata__",0)
+        print("loaded __metadata__ is an empty list, output file will not contain __metadata__ in header")
+    else:
+        print("adding __metadata__ to header:")
+        json.dump(inmeta,fp=sys.stdout,indent=2)
+        if isinstance(inmeta,dict):
+            for k in inmeta:
+                inmeta[k]=str(inmeta[k])
+        else:
+            inmeta=str(inmeta)
+        js["__metadata__"]=inmeta
+        print()
+
+    newhdrbuf=json.dumps(js,separators=(',',':'),ensure_ascii=False).encode('utf-8')
+    newhdrlen:int=int(len(newhdrbuf))
+    pad:int=((newhdrlen+7)&(~7))-newhdrlen #pad to multiple of 8
+
+    with open(out_st_file,"wb") as f:
+        f.write(int(newhdrlen+pad).to_bytes(8,'little'))
+        f.write(newhdrbuf)
+        if pad>0: f.write(bytearray([32]*pad))
+        i:int=s.copy_data_to_file(f)
+    if i==0:
+        print(f"file {out_st_file} saved successfully")
+    else:
+        print(f"error {i} occurred when writing to file {out_st_file}")
+    return i
+
+def PrintHeader(cmdLine:dict,input_file:str) -> int:
+    s=SafeTensorsFile.open_file(input_file)
+    js=s.get_header()
+    if js is None: return -1
+
+
+    # All the .safetensors files I've seen have long key names, and as a result,
+    # neither json nor pprint package prints text in very readable format,
     # so we print it ourselves, putting key name & value on one long line.
     # Note the print out is in Python format, not valid JSON format.
     firstKey=True
@@ -91,7 +75,7 @@ def PrintHeader(cmdLine:dict,input_file:str) -> int:
         json.dump(js[key],fp=sys.stdout,ensure_ascii=False,separators=(',',':'))
     print("\n}")
     return 0
-    
+
 def _ParseMore(d:dict):
     '''Basically when printing, try to turn this:
 
@@ -116,15 +100,13 @@ def _ParseMore(d:dict):
                 d[key]=v2
                 value=v2
             except json.JSONDecodeError as e:
-                pass    
+                pass
         if isinstance(value,dict):
             _ParseMore(value)
 
 def PrintMetadata(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile()
-    i=s.open(input_file)
-    if i: return i
-    js=s.parse_buffer()
+    s=SafeTensorsFile.open_file(input_file)
+    js=s.get_header()
     if js is None: return -1
 
     if not "__metadata__" in js:
@@ -133,19 +115,16 @@ def PrintMetadata(cmdLine:dict,input_file:str) -> int:
 
     md=js["__metadata__"]
     if cmdLine['parse_more']:
-        _ParseMore(md)    
+        _ParseMore(md)
     json.dump({"__metadata__":md},fp=sys.stdout,ensure_ascii=False,separators=(',',':'),indent=1)
     return 0
 
-def HeaderKeysToFrozenSet(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile()
-    s.open(input_file,quiet=True)
-    js=s.parse_buffer()
+def HeaderKeysToLists(cmdLine:dict,input_file:str) -> int:
+    s=SafeTensorsFile.open_file(input_file,quiet=True)
+    js=s.get_header()
     if js is None: return -1
 
-    nonscalar_keys:[str]=[]
-    scalar_keys:[str]=[]
-
+    _lora_keys:list[tuple(str,bool)]=[] # use list to sort by name
     for key in js:
         if key=='__metadata__': continue
         v=js[key]
@@ -154,89 +133,96 @@ def HeaderKeysToFrozenSet(cmdLine:dict,input_file:str) -> int:
             if 'shape' in v:
                 if 0==len(v['shape']):
                     isScalar=True
-        if isScalar:
-            scalar_keys.append(key)
-        else:
-            nonscalar_keys.append(key)                                
-    nonscalar_keys.sort()
-    scalar_keys.sort()
+        _lora_keys.append((key,isScalar))
+    _lora_keys.sort(key=lambda x:x[0])
 
     def printkeylist(kl):
         firstKey=True
         for key in kl:
             if firstKey: firstKey=False
             else: print(",")
-            print(f'"{key}"',end='')
+            print(key,end='')
         print()
 
-    print("# known scalar LoRA keys in a frozenset()")
-    print("lora_keys_scalar=frozenset([")
-    printkeylist(scalar_keys)
-    print("])")
-
-    print()
-    print("# known non-scalar LoRA keys in a frozenset()")
-    print("lora_keys_nonscalar=frozenset([")
-    printkeylist(nonscalar_keys)
-    print("])")
+    print("# use list to keep insertion order")
+    print("_lora_keys:list[tuple[str,bool]]=[")
+    printkeylist(_lora_keys)
+    print("]")
 
     return 0
 
 
 def ExtractHeader(cmdLine:dict,input_file:str,output_file:str)->int:
-    if os.path.exists(output_file):
-        if cmdLine['force_overwrite']==False:
-            print(f'output file "{output_file}" already exists, use -f to force overwrite',file=sys.stderr)
-            return -1
+    if _need_force_overwrite(output_file,cmdLine): return -1
 
-    s=SafeTensorsFile()
-    i=s.open(input_file)
-    if i: return i
+    s=SafeTensorsFile.open_file(input_file)
+    if s.error!=0: return s.error
 
     hdrbuf=s.hdrbuf
-    s.close() #close it in case user wants to write back to input_file itself
+    s.close_file() #close it in case user wants to write back to input_file itself
     with open(output_file,"wb") as fo:
         wn=fo.write(hdrbuf)
         if wn!=len(hdrbuf):
             print(f"write output file failed, tried to write {len(hdrbuf)} bytes, only wrote {wn} bytes",file=sys.stderr)
             return -1
-    print(f"header saved to file {output_file}")
+    print(f"raw header saved to file {output_file}")
     return 0
 
-def CheckLoRA(cmdLine:dict,input_file:str)->int:
-    s=SafeTensorsFile()
-    i=s.open(input_file)
-    if i: return i
-    js=s.parse_buffer()
+
+def _CheckLoRA_internal(s:SafeTensorsFile)->int:
+    js=s.get_header()
     if js is None: return -1
 
     import lora_keys
+    set_scalar=set()
+    set_nonscalar=set()
+    for x in lora_keys._lora_keys:
+        if x[1]==True: set_scalar.add(x[0])
+        else: set_nonscalar.add(x[0])
 
-    not_lora_items:[str]=[]
-    allkeys=lora_keys.lora_keys_scalar.union(lora_keys.lora_keys_nonscalar)
-    lora_items:dict[str,int]=dict.fromkeys(allkeys,int(0))
+    bad_unknowns:list[str]=[] # unrecognized keys
+    bad_scalars:list[str]=[] #bad scalar
+    bad_nonscalars:list[str]=[] #bad nonscalar
     for key in js:
-        if key in lora_items:
-            lora_items[key]+=int(1)
+        if key in set_nonscalar:
+            if js[key]['shape']==[]: bad_nonscalars.append(key)
+            set_nonscalar.remove(key)
+        elif key in set_scalar:
+            if js[key]['shape']!=[]: bad_scalars.append(key)
+            set_scalar.remove(key)
         else:
             if "__metadata__"!=key:
-                not_lora_items.append(key)            
+                bad_unknowns.append(key)
 
     hasError=False
-    if len(not_lora_items)!=0:
-        print("unrecognized items:")
-        for x in not_lora_items: print(" ",x)
+    if len(set_scalar)>0:
+        print("missing scalar keys:")
+        for x in set_scalar: print(" ",x)
         hasError=True
-    
-    for k,v in lora_items.items():
-        if (v==1): continue
-        if (v==0):
-            print(f"{k}: missing")
-        else:
-            print(f"{k}: used {v} times")    
-        hasError=True            
+    if len(set_nonscalar)>0:
+        print("missing nonscalar keys:")
+        for x in set_nonscalar: print(" ",x)
+        hasError=True
 
-    if hasError: return 1
+    if len(bad_unknowns)!=0:
+        print("unrecognized items:")
+        for x in bad_unknowns: print(" ",x)
+        hasError=True
 
-    print("looks like an OK LoRA file")
+    if len(bad_scalars)!=0:
+        print("keys expected to be scalar but are nonscalar:")
+        for x in bad_scalars: print(" ",x)
+        hasError=True
+
+    if len(bad_nonscalars)!=0:
+        print("keys expected to be nonscalar but are scalar:")
+        for x in bad_nonscalars: print(" ",x)
+        hasError=True
+
+    return (1 if hasError else 0)
+
+def CheckLoRA(cmdLine:dict,input_file:str)->int:
+    s=SafeTensorsFile.open_file(input_file)
+    i:int=_CheckLoRA_internal(s)
+    if i==0: print("looks like an OK LoRA file")
     return 0
