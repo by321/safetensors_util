@@ -24,7 +24,7 @@ Options for commands:
                                doublequotes to make text more readable
 
 
-The most interesting/useful thing is the metadata command:
+The most useful thing is probably the metadata command:
 
         python safetensors_util.py metadata input_file.safetensors -pm
 
