@@ -54,7 +54,7 @@ You can create a JSON file containing a __metadata__ entry:
                     "regularization_images": "none"
               },
               "ss_network_alpha":16,
-              "ss_network_dim":16,
+              "ss_network_dim":16
          }
     }
 
