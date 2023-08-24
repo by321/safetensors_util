@@ -37,7 +37,7 @@ into this:
          }
         },
 
-You can create a JSON file containing a\_\_metadata\_\_ entry:
+You can create a JSON file containing a \_\_metadata\_\_ entry:
 
     {
          "__metadata__":{
