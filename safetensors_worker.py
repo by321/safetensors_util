@@ -8,8 +8,8 @@ def _need_force_overwrite(output_file:str,cmdLine:dict) -> bool:
             return True
     return False
 
-def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,out_st_file:str) -> int:
-    if _need_force_overwrite(out_st_file,cmdLine): return -1
+def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,output_file:str) -> int:
+    if _need_force_overwrite(output_file,cmdLine): return -1
 
     with open(in_json_file,"rt") as f:
         inmeta=json.load(f)
@@ -35,6 +35,7 @@ def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,out_st_fi
                 inmeta[k]=str(inmeta[k])
         else:
             inmeta=str(inmeta)
+        #js["__metadata__"]=json.dumps(inmeta,ensure_ascii=False)
         js["__metadata__"]=inmeta
         print()
 
@@ -42,15 +43,15 @@ def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,out_st_fi
     newhdrlen:int=int(len(newhdrbuf))
     pad:int=((newhdrlen+7)&(~7))-newhdrlen #pad to multiple of 8
 
-    with open(out_st_file,"wb") as f:
+    with open(output_file,"wb") as f:
         f.write(int(newhdrlen+pad).to_bytes(8,'little'))
         f.write(newhdrbuf)
         if pad>0: f.write(bytearray([32]*pad))
         i:int=s.copy_data_to_file(f)
     if i==0:
-        print(f"file {out_st_file} saved successfully")
+        print(f"file {output_file} saved successfully")
     else:
-        print(f"error {i} occurred when writing to file {out_st_file}")
+        print(f"error {i} occurred when writing to file {output_file}")
     return i
 
 def PrintHeader(cmdLine:dict,input_file:str) -> int:
@@ -226,3 +227,4 @@ def CheckLoRA(cmdLine:dict,input_file:str)->int:
     i:int=_CheckLoRA_internal(s)
     if i==0: print("looks like an OK LoRA file")
     return 0
+

@@ -10,7 +10,7 @@ This is a utility program for [safetensors files](https://github.com/huggingface
       --help     Show this message and exit.
     
     Commands:
-      checklora   see if input file is a LoRA file
+      checklora   see if input file is a SD 1.x LoRA file
       extracthdr  extract file header and save to output file
       header      print file header
       listkeys    print header key names (except __metadata__) as a Python list
