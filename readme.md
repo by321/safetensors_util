@@ -36,26 +36,26 @@ into this:
           "img_count":60
          }
         },
-You can create a JSON file containing a __metadata_ entry:
+You can create a JSON file containing a __metadata__ entry:
 
     {
-     "__metadata__":{
-      "Description": "Stable Diffusion 1.5 LoRA trained on cat pictures",
-      "Trigger Words":["cat from hell"],
-      "Base Model": "Stable Diffusion 1.5",
-      "Training Info": {
-        "trainer": "modified Kohya SS",
-        "resolution":[512,512],
-        "lr":1e-6,
-        "text_lr":1e-6,
-        "schedule": "linear",
-        "text_scheduler": "linear",
-        "clip_skip": 0,
-        "regularization_images": "none"
-      },
-      "ss_network_alpha":16,
-      "ss_network_dim":16,
-     }
+         "__metadata__":{
+              "Description": "Stable Diffusion 1.5 LoRA trained on cat pictures",
+              "Trigger Words":["cat from hell"],
+              "Base Model": "Stable Diffusion 1.5",
+              "Training Info": {
+                    "trainer": "modified Kohya SS",
+                    "resolution":[512,512],
+                    "lr":1e-6,
+                    "text_lr":1e-6,
+                    "schedule": "linear",
+                    "text_scheduler": "linear",
+                    "clip_skip": 0,
+                    "regularization_images": "none"
+              },
+              "ss_network_alpha":16,
+              "ss_network_dim":16,
+         }
     }
 
 and write it to safetensors file header using the writemd command:
