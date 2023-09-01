@@ -13,6 +13,8 @@ force_overwrite_flag=click.option("-f","--force-overwrite",default=False,is_flag
                                   help="overwrite existing files")
 fix_ued_flag=click.option("-pm","--parse-more",default=False,is_flag=True, show_default=True,
                           help="when printing metadata, unescaped doublequotes to make text more readable" )
+quiet_flag=click.option("-q","--quiet",default=False,is_flag=True, show_default=True,
+                        help="when printing metadata, only print json" )
 
 @click.group()
 
@@ -33,9 +35,11 @@ def cmd_header(ctx,input_file:str) -> int:
 @cli.command(name="metadata",short_help="print only __metadata__ in file header")
 @readonly_input_file
 @fix_ued_flag
+@quiet_flag
 @click.pass_context
-def cmd_meta(ctx,input_file:str,parse_more:bool)->int:
+def cmd_meta(ctx,input_file:str,parse_more:bool,quiet:bool)->int:
     ctx.obj['parse_more'] = parse_more
+    ctx.obj['quiet'] = quiet
     sys.exit( safetensors_worker.PrintMetadata(ctx.obj,input_file) )
 
 @cli.command(name="listkeys",short_help="print header key names (except __metadata__) as a Python list")
