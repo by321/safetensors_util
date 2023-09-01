@@ -106,7 +106,7 @@ def _ParseMore(d:dict):
             _ParseMore(value)
 
 def PrintMetadata(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile.open_file(input_file,cmdline["quiet"])
+    s=SafeTensorsFile.open_file(input_file,cmdLine["quiet"])
     js=s.get_header()
     if js is None: return -1
 
