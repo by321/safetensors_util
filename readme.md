@@ -62,3 +62,11 @@ You can create a JSON file containing a \_\_metadata\_\_ entry:
 and write it to safetensors file header using the writemd command:
 
         python safetensors_util.py writemd input.safetensors input.json output.safetensors
+
+For Windows user (CMD), to output the header files into a JSON file:
+
+        python safetensors_util.py metadata "C:\SD_DIR\models\Lora\YOUR_LORA.safetensors" | sed "1 d" >> logs/result.json
+
+Meanwhile this can be used in some base models (e.g. SDXL based finetune, SD 1.X probably don't, SD 2.X can refer to bundled yaml):
+
+        python safetensors_util.py metadata "C:\SD_DIR\models\Stable-diffusion\SDXL_FT.safetensors" | sed "1 d" >> logs/result.json
