@@ -59,6 +59,6 @@ You can create a JSON file containing a \_\_metadata\_\_ entry:
          }
     }
 
-and write it to safetensors file header using the writemd command:
+and write it to a safetensors file header using the **writemd** command:
 
         python safetensors_util.py writemd input.safetensors input.json output.safetensors
