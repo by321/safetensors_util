@@ -1,6 +1,6 @@
 ### Features
 
-This is a utility program for [safetensors files](https://github.com/huggingface/safetensors "safetensors files") written in Python only. Currently it can do the following:
+This is a light-weight utility program for [safetensors files](https://github.com/huggingface/safetensors "safetensors files") written in Python only (no major external dependencies). Currently it can do the following:
 
     
     Usage: safetensors_util.py [OPTIONS] COMMAND [ARGS]...
