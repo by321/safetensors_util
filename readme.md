@@ -2,13 +2,14 @@
 
 This is a light-weight utility program for [safetensors files](https://github.com/huggingface/safetensors "safetensors files") written in Python only (no major external dependencies). Currently it can do the following:
 
-    
+
     Usage: safetensors_util.py [OPTIONS] COMMAND [ARGS]...
-    
+
     Options:
-      --version  Show the version and exit.
-      --help     Show this message and exit.
-    
+      --version    Show the version and exit.
+      -q, --quiet  quiet mode, don't print informational stuff
+      --help       Show this message and exit.
+
     Commands:
       checklora   see if input file is a SD 1.x LoRA file
       extracthdr  extract file header and save to output file

@@ -55,7 +55,7 @@ def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,output_fi
     return i
 
 def PrintHeader(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile.open_file(input_file)
+    s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
     js=s.get_header()
     if js is None: return -1
 
@@ -106,7 +106,7 @@ def _ParseMore(d:dict):
             _ParseMore(value)
 
 def PrintMetadata(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile.open_file(input_file)
+    s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
     js=s.get_header()
     if js is None: return -1
 
@@ -121,7 +121,7 @@ def PrintMetadata(cmdLine:dict,input_file:str) -> int:
     return 0
 
 def HeaderKeysToLists(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile.open_file(input_file,quiet=True)
+    s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
     js=s.get_header()
     if js is None: return -1
 
