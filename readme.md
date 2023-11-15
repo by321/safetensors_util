@@ -19,7 +19,7 @@ This is a light-weight utility program for [safetensors files](https://github.co
       writemd     write metadata to safetensors file header
 
 
-The most useful thing is probably the metadata command:
+The most useful thing is probably the read and write metadata commands. To read metadata:
 
         python safetensors_util.py metadata input_file.safetensors -pm
 
