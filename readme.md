@@ -43,7 +43,7 @@ You can create a JSON file containing a \_\_metadata\_\_ entry:
     {
          "__metadata__":{
               "Description": "Stable Diffusion 1.5 LoRA trained on cat pictures",
-              "Trigger Words":["cat from hell"],
+              "Trigger Words":["cat from hell","killer kitten"],
               "Base Model": "Stable Diffusion 1.5",
               "Training Info": {
                     "trainer": "modified Kohya SS",
