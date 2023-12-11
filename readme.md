@@ -26,7 +26,7 @@ The most useful thing is probably the read and write metadata commands. To read 
 
 Many safetensors files, especially LoRA files, have a \_\_metadata\_\_ field in the file header that records training information, such as learning rates, number of epochs, number of images used, etc. You can see how your favorite file was trained and perhaps use some of the training parameters for your own model in the future.
 
-The optional **-pm** flag is meant to make output more readable. Because safetensors files only allow string-to-string dictionary in header, non-string values need to be quoted. Basically the **-pm** flag tries to turn this:
+The optional **-pm** flag is meant to make output more readable. Because safetensors files only allow string-to-string dictionary in metadata, non-string values must be quoted. Basically the **-pm** flag tries to turn this:
 
         "ss_dataset_dirs":"{\"abc\": {\"n_repeats\": 2, \"img_count\": 60}}",
 
