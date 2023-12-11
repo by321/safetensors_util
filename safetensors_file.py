@@ -24,20 +24,18 @@ class SafeTensorsChunk:
 class SafeTensorsFile:
     def __init__(self):
         self.f=None         #file handle
-        self.hdrbuf=None    #header byet buffer
+        self.hdrbuf=None    #header byte buffer
         self.header=None    #parsed header as a dict
         self.error=0
 
     def __del__(self):
         self.close_file()
-        
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.f is not None:
-            self.f.close()
-
+        self.close_file()
 
     def close_file(self):
         if self.f is not None:
@@ -71,7 +69,7 @@ class SafeTensorsFile:
 
     def open(self,fn:str,quiet=False)->int:
         st=os.stat(fn)
-        if st.st_size<8:
+        if st.st_size<8: #test file: zero_len_file.safetensors
             raise SafeTensorsException.invalid_file(fn,"length less than 8 bytes")
 
         f=open(fn,"rb")
@@ -79,9 +77,8 @@ class SafeTensorsFile:
         if len(b8)!=8:
             raise SafeTensorsException.invalid_file(fn,f"read only {len(b8)} bytes at start of file")
         headerlen=int.from_bytes(b8,'little',signed=False)
-        if headerlen==0:
-            raise SafeTensorsException.invalid_file(fn,"header size is 0")
-        if (8+headerlen>st.st_size):
+
+        if (8+headerlen>st.st_size): #test file: header_size_too_big.safetensors
             raise SafeTensorsException.invalid_file(fn,"header extends past end of file")
 
         if quiet==False:

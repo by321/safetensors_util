@@ -78,7 +78,7 @@ def PrintHeader(cmdLine:dict,input_file:str) -> int:
     return 0
 
 def _ParseMore(d:dict):
-    '''Basically when printing, try to turn this:
+    '''Basically try to turn this:
 
         "ss_dataset_dirs":"{\"abc\": {\"n_repeats\": 2, \"img_count\": 60}}",
 
@@ -106,18 +106,18 @@ def _ParseMore(d:dict):
             _ParseMore(value)
 
 def PrintMetadata(cmdLine:dict,input_file:str) -> int:
-    s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
-    js=s.get_header()
-    if js is None: return -1
+    with SafeTensorsFile.open_file(input_file,cmdLine['quiet']) as s:
+        js=s.get_header()
+        if js is None: return -1
 
-    if not "__metadata__" in js:
-        print("file header does not contain a __metadata__ item",file=sys.stderr)
-        return -2
+        if not "__metadata__" in js:
+            print("file header does not contain a __metadata__ item",file=sys.stderr)
+            return -2
 
-    md=js["__metadata__"]
-    if cmdLine['parse_more']:
-        _ParseMore(md)
-    json.dump({"__metadata__":md},fp=sys.stdout,ensure_ascii=False,separators=(',',':'),indent=1)
+        md=js["__metadata__"]
+        if cmdLine['parse_more']:
+            _ParseMore(md)
+        json.dump({"__metadata__":md},fp=sys.stdout,ensure_ascii=False,separators=(',',':'),indent=1)
     return 0
 
 def HeaderKeysToLists(cmdLine:dict,input_file:str) -> int:
@@ -225,7 +225,7 @@ def _CheckLoRA_internal(s:SafeTensorsFile)->int:
 def CheckLoRA(cmdLine:dict,input_file:str)->int:
     s=SafeTensorsFile.open_file(input_file)
     i:int=_CheckLoRA_internal(s)
-    if i==0: print("looks like an OK LoRA file")
+    if i==0: print("looks like an OK SD 1.x LoRA file")
     return 0
 
 def ExtractData(cmdLine:dict,input_file:str,key_name:str,output_file:str)->int:
