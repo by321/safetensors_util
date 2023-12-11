@@ -15,9 +15,9 @@ This is a light-weight utility program for [safetensors files](https://github.co
       extractdata  extract one tensor and save to file
       extracthdr   extract file header and save to output file
       header       print file header
-      listkeys     print header key names (except \_\_metadata\_\_) as a Python list
-      metadata     print only \_\_metadata\_\_ in file header
-      writemd      read \_\_metadata\_\_ from json and write to safetensors file
+      listkeys     print header key names (except __metadata__) as a Python list
+      metadata     print only __metadata__ in file header
+      writemd      read __metadata__ from json and write to safetensors file
 
 
 The most useful thing is probably the read and write metadata commands. To read metadata:
