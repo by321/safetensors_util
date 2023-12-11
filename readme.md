@@ -11,12 +11,13 @@ This is a light-weight utility program for [safetensors files](https://github.co
       --help       Show this message and exit.
 
     Commands:
-      checklora   see if input file is a SD 1.x LoRA file
-      extracthdr  extract file header and save to output file
-      header      print file header
-      listkeys    print header key names (except __metadata__) as a Python list
-      metadata    print only __metadata__ in file header
-      writemd     write metadata to safetensors file header
+      checklora    see if input file is a SD 1.x LoRA file
+      extractdata  extract one tensor and save to file
+      extracthdr   extract file header and save to output file
+      header       print file header
+      listkeys     print header key names (except \_\_metadata\_\_) as a Python list
+      metadata     print only \_\_metadata\_\_ in file header
+      writemd      read \_\_metadata\_\_ from json and write to safetensors file
 
 
 The most useful thing is probably the read and write metadata commands. To read metadata:

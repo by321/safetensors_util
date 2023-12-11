@@ -228,3 +228,22 @@ def CheckLoRA(cmdLine:dict,input_file:str)->int:
     if i==0: print("looks like an OK LoRA file")
     return 0
 
+def ExtractData(cmdLine:dict,input_file:str,key_name:str,output_file:str)->int:
+    if _need_force_overwrite(output_file,cmdLine): return -1
+
+    s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
+    if s.error!=0: return s.error
+
+    bindata=s.load_one_tensor(key_name)
+    s.close_file() #close it just in case user wants to write back to input_file itself
+    if bindata is None:
+        print(f'key "{key_name}" not found in header (key names are case-sensitive)',file=sys.stderr)
+        return -1
+
+    with open(output_file,"wb") as fo:
+        wn=fo.write(bindata)
+        if wn!=len(bindata):
+            print(f"write output file failed, tried to write {len(bindata)} bytes, only wrote {wn} bytes",file=sys.stderr)
+            return -1
+    if cmdLine['quiet']==False: print(f"{key_name} saved to {output_file}, len={wn}")
+    return 0

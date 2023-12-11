@@ -95,60 +95,19 @@ class SafeTensorsFile:
         if self.hdrbuf is None: raise Exception("SafetensorsFile no header buffer")
         self._CheckDuplicateHeaderKeys()
         self.header=json.loads(self.hdrbuf)
-
         return self.header
 
     def load_one_tensor(self,tensor_name:str):
+        self.get_header()
+        if tensor_name not in self.header: return None
+
         t=self.header[tensor_name]
-        if t['dtype']=='F16':
-            dt=numpy.half
-        elif t['dtype']=='F32':
-            dt=numpy.single
-        #elif t['dtype']=='F64':
-        #    dt=numpy.double
-        else:
-            msg=f"unsupported tensor data type in {self.filename}: {t['dtype']}"
-            raise SafeTensorsException(msg)
         self.f.seek(8+self.headerlen+t['data_offsets'][0])
         bytesToRead=t['data_offsets'][1]-t['data_offsets'][0]
         bytes=self.f.read(bytesToRead)
-
-        n=1
-        for v in t['shape']: n=n*v
-        vals=numpy.frombuffer(bytes,dtype=dt,count=n,offset=0)
-        if dt!=numpy.single: vals=vals.astype(numpy.single)
-        print(self.header[tensor_name],dt,n,bytesToRead)
-        self.header[tensor_name]['values']=vals
-        """a = np.array([1, 2, 3])
-        print(a)
-        print(a.dtype)
-        # [1 2 3]
-        # int64
-
-        a_float = a.astype(np.float32)"""
-
-    def load_data(self):
-        self.get_header()
-        #n:int=max([self.header[key].data_offsets[1] for key in self.header])
-        #self.f.seek(8+self.headerlen)
-        #databytes=self.f.read(n)
-        #if len(databytes)!=n:
-        #    msg=f"error reading file {self.filename}, tried to read {n} bytes, only read {len(databytes)}"
-        #    raise SafeTensorsException(msg)
-        d={}
-        d['__metadata__']=''
-        read_order:list[tuple(str,int)]=[]
-        for k,v in self.header.items():
-            if k=="__metadata__": #if metadata, just copy
-                d['__metadata__']=v
-                continue
-            read_order.append((k,v['data_offsets'][0]))
-        read_order.sort(key=lambda x:x[1])
-        for x in read_order:
-            self.load_one_tensor(x[0])
-            #print("asdfas",x[0])
-            #print(x[0],self.header[x[0]])
-        # 'dtype': 'F16', 'shape': [32, 768], 'data_offsets': [491526, 540678]
+        if len(bytes)!=bytesToRead:
+            print(f"{tensor_name}: length={bytesToRead}, only read {len(bytes)} bytes",file=sys.stderr)
+        return bytes
 
     def copy_data_to_file(self,file_handle) -> int:
 

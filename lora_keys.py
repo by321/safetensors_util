@@ -1,4 +1,5 @@
 # use list to keep insertion order
+# SD 1.5 LoRA keys
 _lora_keys:list[tuple[str,bool]]=[
 ('lora_te_text_model_encoder_layers_0_mlp_fc1.alpha', True),
 ('lora_te_text_model_encoder_layers_0_mlp_fc1.lora_down.weight', False),

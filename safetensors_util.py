@@ -27,11 +27,13 @@ def cli(ctx,quiet:bool):
     ctx.ensure_object(dict)
     ctx.obj['quiet'] = quiet
 
+
 @cli.command(name="header",short_help="print file header")
 @readonly_input_file
 @click.pass_context
 def cmd_header(ctx,input_file:str) -> int:
     sys.exit( safetensors_worker.PrintHeader(ctx.obj,input_file) )
+
 
 @cli.command(name="metadata",short_help="print only __metadata__ in file header")
 @readonly_input_file
@@ -41,11 +43,13 @@ def cmd_meta(ctx,input_file:str,parse_more:bool)->int:
     ctx.obj['parse_more'] = parse_more
     sys.exit( safetensors_worker.PrintMetadata(ctx.obj,input_file) )
 
+
 @cli.command(name="listkeys",short_help="print header key names (except __metadata__) as a Python list")
 @readonly_input_file
 @click.pass_context
 def cmd_keyspy(ctx,input_file:str) -> int:
     sys.exit( safetensors_worker.HeaderKeysToLists(ctx.obj,input_file) )
+
 
 @cli.command(name="writemd",short_help="read __metadata__ from json and write to safetensors file")
 @click.argument("in_st_file", metavar='input_st_file',
@@ -60,6 +64,7 @@ def cmd_writemd(ctx,in_st_file:str,in_json_file:str,output_file:str,force_overwr
     ctx.obj['force_overwrite'] = force_overwrite
     sys.exit( safetensors_worker.WriteMetadataToHeader(ctx.obj,in_st_file,in_json_file,output_file) )
 
+
 @cli.command(name="extracthdr",short_help="extract file header and save to output file")
 @readonly_input_file
 @output_file
@@ -68,6 +73,18 @@ def cmd_writemd(ctx,in_st_file:str,in_json_file:str,output_file:str,force_overwr
 def cmd_extractheader(ctx,input_file:str,output_file:str,force_overwrite:bool) -> int:
     ctx.obj['force_overwrite'] = force_overwrite
     sys.exit( safetensors_worker.ExtractHeader(ctx.obj,input_file,output_file) )
+
+
+@cli.command(name="extractdata",short_help="extract one tensor and save to file")
+@readonly_input_file
+@click.argument("key_name", metavar='key_name',type=click.STRING)
+@output_file
+@force_overwrite_flag
+@click.pass_context
+def cmd_extractheader(ctx,input_file:str,key_name:str,output_file:str,force_overwrite:bool) -> int:
+    ctx.obj['force_overwrite'] = force_overwrite
+    sys.exit( safetensors_worker.ExtractData(ctx.obj,input_file,key_name,output_file) )
+
 
 @cli.command(name="checklora",short_help="see if input file is a SD 1.x LoRA file")
 @readonly_input_file
