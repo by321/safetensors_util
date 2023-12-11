@@ -30,6 +30,14 @@ class SafeTensorsFile:
 
     def __del__(self):
         self.close_file()
+        
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.f is not None:
+            self.f.close()
+
 
     def close_file(self):
         if self.f is not None:
