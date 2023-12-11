@@ -6,10 +6,13 @@ from safetensors_worker import _ParseMore
 $ python3 safetensors_m.py ss_network_module /path/to/file/summer_dress.safetensors
 "networks.lora"
 
-$ python3 safetensors_m.py nonexistent_module /path/to/file/summer_dress.safetensors
+$ python3 safetensors_object.py nonexistent_module /path/to/file/summer_dress.safetensors
 Error: Metadata does not contain a `nonexistent_module` item, did you spell it right?
 
-$ python3 safetensors_m.py ss_network_module /path/to/file/weird_file.safetensors
+$ python3 safetensors_object.py ss_network_module /path/to/file/Joanne.safetensors
+Error: File is embedding/textual inversion, not a LoRA/Lycoris training set
+
+$ python3 safetensors_object.py ss_network_module /path/to/file/weird_file.safetensors
 Error: File header does not contain a `__metadata__` item
 
 $ python3 safetensors_m.py ss_tag_frequency /path/to/file/trina.safetensors
@@ -29,6 +32,8 @@ def get_object(tensorsfile: str) -> str:
 	js = s.get_header()
 	s.close_file()
 
+	if "emp_params" in js:
+		return "Error: File is embedding/textual inversion, not a LoRA/Lycoris training set"
 	if "__metadata__" not in js:
 		return "Error: File header does not contain a `__metadata__` item"
 	md = js["__metadata__"]
