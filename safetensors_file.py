@@ -1,5 +1,4 @@
 import os, sys, json
-import numpy
 
 class SafeTensorsException(Exception):
     def __init__(self, msg:str):
