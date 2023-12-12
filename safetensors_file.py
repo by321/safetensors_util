@@ -43,6 +43,7 @@ class SafeTensorsFile:
             self.f=None
             self.filename=""
 
+    #test file: duplicate_keys_in_header.safetensors
     def _CheckDuplicateHeaderKeys(self):
         def parse_object_pairs(pairs):
             return [k for k,_ in pairs]
