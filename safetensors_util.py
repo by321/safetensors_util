@@ -17,7 +17,7 @@ quiet_flag=click.option("-q","--quiet",default=False,is_flag=True, show_default=
                         help="Quiet mode, don't print informational stuff" )
 
 @click.group()
-@click.version_option(version=6)
+@click.version_option(version=7)
 @quiet_flag
 
 @click.pass_context

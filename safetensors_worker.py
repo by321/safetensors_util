@@ -22,7 +22,6 @@ def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,output_fi
 
     s=SafeTensorsFile.open_file(in_st_file)
     js=s.get_header()
-    if js is None: return -1
 
     if inmeta==[]:
         js.pop("__metadata__",0)
@@ -57,8 +56,6 @@ def WriteMetadataToHeader(cmdLine:dict,in_st_file:str,in_json_file:str,output_fi
 def PrintHeader(cmdLine:dict,input_file:str) -> int:
     s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
     js=s.get_header()
-    if js is None: return -1
-
 
     # All the .safetensors files I've seen have long key names, and as a result,
     # neither json nor pprint package prints text in very readable format,
@@ -108,7 +105,6 @@ def _ParseMore(d:dict):
 def PrintMetadata(cmdLine:dict,input_file:str) -> int:
     with SafeTensorsFile.open_file(input_file,cmdLine['quiet']) as s:
         js=s.get_header()
-        if js is None: return -1
 
         if not "__metadata__" in js:
             print("file header does not contain a __metadata__ item",file=sys.stderr)
@@ -123,7 +119,6 @@ def PrintMetadata(cmdLine:dict,input_file:str) -> int:
 def HeaderKeysToLists(cmdLine:dict,input_file:str) -> int:
     s=SafeTensorsFile.open_file(input_file,cmdLine['quiet'])
     js=s.get_header()
-    if js is None: return -1
 
     _lora_keys:list[tuple(str,bool)]=[] # use list to sort by name
     for key in js:
@@ -156,7 +151,7 @@ def HeaderKeysToLists(cmdLine:dict,input_file:str) -> int:
 def ExtractHeader(cmdLine:dict,input_file:str,output_file:str)->int:
     if _need_force_overwrite(output_file,cmdLine): return -1
 
-    s=SafeTensorsFile.open_file(input_file)
+    s=SafeTensorsFile.open_file(input_file,parseHeader=False)
     if s.error!=0: return s.error
 
     hdrbuf=s.hdrbuf
@@ -171,10 +166,8 @@ def ExtractHeader(cmdLine:dict,input_file:str,output_file:str)->int:
 
 
 def _CheckLoRA_internal(s:SafeTensorsFile)->int:
-    js=s.get_header()
-    if js is None: return -1
-
     import lora_keys
+    js=s.get_header()
     set_scalar=set()
     set_nonscalar=set()
     for x in lora_keys._lora_keys:

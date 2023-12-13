@@ -63,12 +63,12 @@ class SafeTensorsFile:
             raise SafeTensorsException.invalid_file(self.filename,"duplicate keys in header")
 
     @staticmethod
-    def open_file(filename:str,quiet=False):
+    def open_file(filename:str,quiet=False,parseHeader=True):
         s=SafeTensorsFile()
-        s.open(filename,quiet)
+        s.open(filename,quiet,parseHeader)
         return s
 
-    def open(self,fn:str,quiet=False)->int:
+    def open(self,fn:str,quiet=False,parseHeader=True)->int:
         st=os.stat(fn)
         if st.st_size<8: #test file: zero_len_file.safetensors
             raise SafeTensorsException.invalid_file(fn,"length less than 8 bytes")
@@ -93,13 +93,12 @@ class SafeTensorsFile:
         self.hdrbuf=hdrbuf
         self.error=0
         self.headerlen=headerlen
+        if parseHeader==True:
+            self._CheckDuplicateHeaderKeys()
+            self.header=json.loads(self.hdrbuf)
         return 0
 
     def get_header(self):
-        if self.header is not None: return self.header
-        if self.hdrbuf is None: raise Exception("SafetensorsFile no header buffer")
-        self._CheckDuplicateHeaderKeys()
-        self.header=json.loads(self.hdrbuf)
         return self.header
 
     def load_one_tensor(self,tensor_name:str):
