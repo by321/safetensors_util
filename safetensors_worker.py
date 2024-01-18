@@ -166,7 +166,7 @@ def ExtractHeader(cmdLine:dict,input_file:str,output_file:str)->int:
 
 
 def _CheckLoRA_internal(s:SafeTensorsFile)->int:
-    import lora_keys
+    import lora_keys_sd15 as lora_keys
     js=s.get_header()
     set_scalar=set()
     set_nonscalar=set()
