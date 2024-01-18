@@ -189,6 +189,12 @@ def _CheckLoRA_internal(s:SafeTensorsFile)->int:
                 bad_unknowns.append(key)
 
     hasError=False
+
+    if len(bad_unknowns)!=0:
+        print("INFO: unrecognized items:")
+        for x in bad_unknowns: print(" ",x)
+        #hasError=True
+
     if len(set_scalar)>0:
         print("missing scalar keys:")
         for x in set_scalar: print(" ",x)
@@ -196,11 +202,6 @@ def _CheckLoRA_internal(s:SafeTensorsFile)->int:
     if len(set_nonscalar)>0:
         print("missing nonscalar keys:")
         for x in set_nonscalar: print(" ",x)
-        hasError=True
-
-    if len(bad_unknowns)!=0:
-        print("unrecognized items:")
-        for x in bad_unknowns: print(" ",x)
         hasError=True
 
     if len(bad_scalars)!=0:
